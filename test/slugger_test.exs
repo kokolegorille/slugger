@@ -2,7 +2,7 @@ defmodule SluggerTest do
   use ExUnit.Case
   doctest Slugger
 
-  #--- slugify()
+  # --- slugify()
 
   test "string keep case" do
     assert Slugger.slugify("ABC") == "ABC"
@@ -28,7 +28,7 @@ defmodule SluggerTest do
     assert Slugger.slugify("   A B  C  ") == "A-B-C"
     assert Slugger.slugify("   A B  C  ", ?_) == "A_B_C"
   end
-  
+
   test "replace multiple seperator inside and outside" do
     assert Slugger.slugify("--a--b c - - - ") == "a-b-c"
   end
@@ -44,8 +44,8 @@ defmodule SluggerTest do
     assert Slugger.slugify("Sheep's Milk") == "Sheeps-Milk"
   end
 
-  #--- slugify_downcase()
-  
+  # --- slugify_downcase()
+
   test "string to lower" do
     assert Slugger.slugify_downcase("ABC") == "abc"
   end
@@ -71,19 +71,20 @@ defmodule SluggerTest do
     assert Slugger.slugify_downcase("Sheep's Milk") == "sheeps-milk"
   end
 
-  #--- Naughty strings
+  # --- Naughty strings
 
   test "naughty strings" do
     "test/big-list-of-naughty-strings/blns.json"
-    |> File.read!
-    |> Poison.decode!
-    |> Enum.each(fn(string) ->
-      assert is_binary Slugger.slugify(string)
-      assert is_binary Slugger.slugify_downcase(string)
+    |> File.read!()
+    # |> Poison.decode!()
+    |> JSON.decode!()
+    |> Enum.each(fn string ->
+      assert is_binary(Slugger.slugify(string))
+      assert is_binary(Slugger.slugify_downcase(string))
     end)
   end
 
-  #--- Application config
+  # --- Application config
 
   test "config defaults" do
     Application.load(:slugger)
@@ -94,7 +95,7 @@ defmodule SluggerTest do
     assert Slugger.slugify("a ü") == "a-ue"
   end
 
-  #--- truncate_slug()
+  # --- truncate_slug()
 
   test "don't truncate short enough slugs" do
     assert Slugger.truncate_slug("a-b-c", 10) == "a-b-c"
@@ -110,9 +111,10 @@ defmodule SluggerTest do
     assert Slugger.truncate_slug("a-b-c", -4) == ""
     assert Slugger.truncate_slug("a-b-c", -5) == ""
   end
+
   test "truncate before separator that is in range" do
     assert Slugger.truncate_slug("abc-def-ghi-jkl-mno-pqr", 8) == "abc-def"
-    assert Slugger.truncate_slug("abc_def", 6, [separator: ?_]) == "abc"
+    assert Slugger.truncate_slug("abc_def", 6, separator: ?_) == "abc"
   end
 
   test "don't truncate unimpaired last word" do
@@ -124,8 +126,7 @@ defmodule SluggerTest do
   end
 
   test "truncate hard if option is set" do
-    assert Slugger.truncate_slug("abc-def", 5, [hard: true]) == "abc-d"
-    assert Slugger.truncate_slug("abc_def", 5, [separator: ?_, hard: true]) == "abc_d"
+    assert Slugger.truncate_slug("abc-def", 5, hard: true) == "abc-d"
+    assert Slugger.truncate_slug("abc_def", 5, separator: ?_, hard: true) == "abc_d"
   end
-
 end
